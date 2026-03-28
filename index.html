@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Unplanned Deed — A MIST 2026 Short Film</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #e8e4df;
+    --accent: #c4a46c;
+    --muted: #6b6560;
+    --dim: #2a2724;
+    --paper: #f5f0e8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--bg);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === GRAIN OVERLAY === */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* === RIPPLE CANVAS === */
+  .ripple-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.3;
+  }
+
+  /* === HERO === */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1;
+    padding: 2rem;
+  }
+
+  .hero-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--fg);
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.6s forwards;
+    max-width: 800px;
+  }
+
+  .hero-title em {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--muted);
+    margin-top: 2rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1s ease 1s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+  }
+
+  .scroll-hint span {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: var(--muted);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* === SECTIONS === */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* === DIVIDER === */
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 4rem 0;
+  }
+
+  .divider-line {
+    height: 1px;
+    width: 60px;
+    background: var(--dim);
+  }
+
+  .divider-icon {
+    color: var(--accent);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+  }
+
+  /* === FILM SECTION === */
+  .film-section {
+    padding: 2rem 0 6rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+
+  .video-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 5px;
+    border: 1px solid rgba(196, 164, 108, 0.15);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    background: #111;
+  }
+
+  .video-container iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  /* === STATEMENT === */
+  .statement-section {
+    padding: 4rem 0 6rem;
+  }
+
+  .statement-card {
+    position: relative;
+    padding: 3.5rem 3rem;
+    border-left: 2px solid var(--accent);
+    background: linear-gradient(135deg, rgba(196,164,108,0.03) 0%, transparent 60%);
+  }
+
+  .statement-card::before {
+    content: '\201C';
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--accent);
+    opacity: 0.15;
+    line-height: 1;
+  }
+
+  .statement-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    line-height: 1.9;
+    color: var(--fg);
+    opacity: 0.9;
+  }
+
+  .statement-text p {
+    margin-bottom: 1.5rem;
+  }
+
+  .statement-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* === THEME BADGE === */
+  .theme-section {
+    padding: 3rem 0 6rem;
+    text-align: center;
+  }
+
+  .theme-badge {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--dim);
+    border-radius: 2px;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    position: relative;
+  }
+
+  .theme-badge strong {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    text-transform: none;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  /* === CREDITS === */
+  .credits-section {
+    padding: 3rem 0 6rem;
+    text-align: center;
+  }
+
+  .credits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    max-width: 600px;
+    margin: 2rem auto 0;
+  }
+
+  .credit-item {
+    text-align: center;
+  }
+
+  .credit-role {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .credit-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.2rem;
+    color: var(--fg);
+  }
+
+  /* === FOOTER === */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--dim);
+  }
+
+  .footer-text {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer-text .year {
+    color: var(--accent);
+  }
+
+  /* === BUTTERFLY FLOAT === */
+  .butterfly-float {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .ripple-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(196, 164, 108, 0.06);
+    animation: rippleExpand linear infinite;
+  }
+
+  @keyframes rippleExpand {
+    0% { transform: scale(0); opacity: 0.4; }
+    100% { transform: scale(4); opacity: 0; }
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* === MOBILE === */
+  @media (max-width: 600px) {
+    .statement-card {
+      padding: 2rem 1.5rem;
+    }
+    .credits-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ripple background -->
+<div class="butterfly-float" id="ripples"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-tag">MIST 2026 Short Film</p>
+  <h1 class="hero-title">The <em>Unplanned</em> Deed</h1>
+  <p class="hero-subtitle">An Experimental Documentary</p>
+  <div class="scroll-hint">
+    <span>Watch</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="divider">
+  <div class="divider-line"></div>
+  <span class="divider-icon">✦</span>
+  <div class="divider-line"></div>
+</div>
+
+<!-- FILM -->
+<section class="film-section">
+  <div class="container">
+    <p class="section-label reveal">The Film</p>
+    <div class="video-wrapper reveal">
+      <div class="video-container">
+        <!-- ============================================== -->
+        <!-- HOW TO UPDATE: Replace VIDEO_ID_HERE below     -->
+        <!-- with your actual YouTube video ID.             -->
+        <!-- Example: if your URL is                        -->
+        <!-- https://youtu.be/dQw4w9WgXcQ                  -->
+        <!-- then replace VIDEO_ID_HERE with dQw4w9WgXcQ   -->
+        <!-- ============================================== -->
+        <iframe 
+          src="https://www.youtube.com/embed/VIDEO_ID_HERE"
+          title="The Unplanned Deed — MIST 2026"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="divider">
+  <div class="divider-line"></div>
+  <span class="divider-icon">✦</span>
+  <div class="divider-line"></div>
+</div>
+
+<!-- DIRECTOR'S STATEMENT -->
+<section class="statement-section">
+  <div class="container">
+    <p class="section-label reveal">Director's Statement</p>
+    <div class="statement-card reveal">
+      <div class="statement-text">
+        <p>We asked three young filmmakers a simple question: can you recall an unplanned moment that changed everything? What followed was never scripted.</p>
+        <p><em>The Unplanned Deed</em> is, in itself, an unplanned deed. What began as a brainstorming session became something none of us anticipated — an experimental documentary where three people sit with a camera and try to trace the invisible threads between who they were as children and who they are becoming now.</p>
+        <p>Each story in this film started with a moment nobody planned. A small gesture, an accident of timing, a presence that didn't know it mattered. Yet these moments shaped everything — quietly, irreversibly, the way water shapes stone without ever meaning to.</p>
+        <p>We didn't set out to make a film about the butterfly effect. We set out to remember. But memory, it turns out, has a way of revealing the weight of things we thought were weightless. The conversations unraveled something real — proof that the smallest, most ordinary moments carry consequences none of us could have predicted.</p>
+        <p>At the end, we return to the beginning: childhood footage none of us had watched in years. The proof that it all happened. That the small deeds were real. That they still are.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THEME -->
+<section class="theme-section">
+  <div class="container reveal">
+    <div class="theme-badge">
+      MIST 2026 Theme
+      <strong>Currents of Consequence: The Might of Small Deeds</strong>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="divider">
+  <div class="divider-line"></div>
+  <span class="divider-icon">✦</span>
+  <div class="divider-line"></div>
+</div>
+
+<!-- CREDITS -->
+<section class="credits-section">
+  <div class="container">
+    <p class="section-label reveal">Credits</p>
+    <div class="credits-grid reveal">
+      <!-- Replace these with real names -->
+      <div class="credit-item">
+        <p class="credit-role">Directed by</p>
+        <p class="credit-name">Your Name</p>
+      </div>
+      <div class="credit-item">
+        <p class="credit-role">Featuring</p>
+        <p class="credit-name">The Filmmakers</p>
+      </div>
+      <div class="credit-item">
+        <p class="credit-role">Edited by</p>
+        <p class="credit-name">Your Name</p>
+      </div>
+      <div class="credit-item">
+        <p class="credit-role">Produced for</p>
+        <p class="credit-name">MIST 2026</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p class="footer-text">The Unplanned Deed — <span class="year">MIST 2026</span></p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Generate ripple circles
+  const container = document.getElementById('ripples');
+  function createRipple() {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple-circle';
+    const size = Math.random() * 200 + 100;
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    const duration = Math.random() * 8 + 6;
+    ripple.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${x - size/2}px; top: ${y - size/2}px;
+      animation-duration: ${duration}s;
+    `;
+    container.appendChild(ripple);
+    setTimeout(() => ripple.remove(), duration * 1000);
+  }
+  setInterval(createRipple, 2000);
+  for (let i = 0; i < 5; i++) setTimeout(createRipple, i * 400);
+</script>
+</body>
+</html>
